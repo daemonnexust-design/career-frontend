@@ -54,6 +54,13 @@ export function ProfileForm() {
             setLoading(true);
             setMessage(null);
 
+            // Validation Checks
+            if (!formData.full_name.trim() || !formData.headline.trim()) {
+                setMessage({ type: 'error', text: 'Hey, details cannnot be blank' });
+                setLoading(false);
+                return;
+            }
+
             const { error } = await supabase
                 .from('profiles')
                 .update(formData)

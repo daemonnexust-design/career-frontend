@@ -38,10 +38,8 @@ export function CVManager() {
         }
 
         if (data) {
-            console.log('CV Data loaded:', data);
             setCv(data);
         } else {
-            console.log('No CV found for user');
             setCv(null);
         }
     };
@@ -81,8 +79,6 @@ export function CVManager() {
             const supabaseUrl = import.meta.env.VITE_PUBLIC_SUPABASE_URL;
             const functionUrl = `${supabaseUrl}/functions/v1/upload-cv`;
 
-            console.log('Uploading to:', functionUrl);
-
             // Use raw fetch to debug potential library issues and get raw response
             const response = await fetch(functionUrl, {
                 method: 'POST',
@@ -104,21 +100,15 @@ export function CVManager() {
                 throw new Error(result.error || 'Upload failed');
             }
 
-            // Log debug info for troubleshooting
-            if (result.debug) {
-                console.log('--- CV Upload Debug Info ---');
-                console.log('User ID:', result.debug.userId);
-                console.log('DB Operation:', result.debug.dbOperation);
-                console.log('DB Result:', result.debug.dbResult);
-                console.log('Storage:', result.debug.storageUpload);
-                console.log('----------------------------');
-            }
-
             // Success
-            await fetchCV();
+            // Immediate UI update from response data to ensure "Document Locked" state appears
+            if (result.data) {
+                setCv(result.data);
+            }
+            // Background fetch to ensure consistency
+            fetchCV();
 
-            const dbId = result.data?.id || 'Unknown';
-            setSuccessMsg(`Upload Successful! DB ID: ${dbId}`);
+            setSuccessMsg('CV uploaded successfully!');
 
         } catch (err: any) {
             console.error('CV Upload Error details:', err);
