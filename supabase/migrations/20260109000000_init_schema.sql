@@ -57,7 +57,7 @@ create trigger on_auth_user_created
 -- APPLICATIONS TABLE
 -- Stores job applications. Private to the user.
 create table public.applications (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) not null,
   company_name text not null,
   status text default 'draft', -- e.g., draft, applied, interviewed, rejected, offer
@@ -74,7 +74,7 @@ create policy "Users can CRUD own applications"
 -- COVER LETTERS TABLE
 -- Stores generated cover letters. Private to the user.
 create table public.cover_letters (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) not null,
   application_id uuid references public.applications(id),
   content text,
@@ -105,7 +105,7 @@ create policy "Users can update own cover letters"
 -- EMAIL DRAFTS TABLE
 -- Stores scheduled or draft emails. Private to the user.
 create table public.email_drafts (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) not null,
   subject text,
   body text,
