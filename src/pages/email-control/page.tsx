@@ -190,68 +190,74 @@ export default function EmailControlPage() {
       {/* Main Content */}
       <section className="py-8 md:py-12 px-4 sm:px-6 lg:px-8 bg-slate-50">
         <div className="max-w-5xl mx-auto">
-          {state === 'idle' && (
+          {(state === 'idle' || state === 'generating') && (
             <GenerateEmailButton
               onGenerate={handleGenerate}
-              disabled={false}
-            />
-          )}
-
-          {state === 'generating' && (
-            <GenerateEmailButton
-              onGenerate={handleGenerate}
-              disabled={true}
+              isLoading={state === 'generating'}
             />
           )}
 
           {(state === 'preview' || state === 'editing' || state === 'schedule-picker') && email && (
-            <div className="space-y-4 md:space-y-6">
-              {/* Gmail Connection Status */}
-              <GmailConnectionStatus
-                isConnected={gmailConnection.isConnected}
-                email={gmailConnection.email}
-                loading={gmailConnection.loading}
-                onConnect={handleConnectGmail}
-              />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Main Content Area */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Gmail Connection Status */}
+                <GmailConnectionStatus
+                  isConnected={gmailConnection.isConnected}
+                  email={gmailConnection.email}
+                  loading={gmailConnection.loading}
+                  onConnect={handleConnectGmail}
+                />
 
-              {/* Send Error Message */}
-              {sendError && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
-                  <i className="ri-error-warning-line text-red-500 text-xl"></i>
-                  <div>
-                    <p className="font-semibold text-red-700">Failed to send email</p>
-                    <p className="text-sm text-red-600">{sendError}</p>
+                {/* Send Error Message */}
+                {sendError && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 animate-shake">
+                    <i className="ri-error-warning-line text-red-500 text-xl"></i>
+                    <div className="flex-grow">
+                      <p className="font-semibold text-red-700">Failed to send email</p>
+                      <p className="text-sm text-red-600">{sendError}</p>
+                    </div>
+                    <button
+                      onClick={() => setSendError(null)}
+                      className="text-red-400 hover:text-red-600 p-1"
+                    >
+                      <i className="ri-close-line text-xl"></i>
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setSendError(null)}
-                    className="ml-auto text-red-400 hover:text-red-600"
-                  >
-                    <i className="ri-close-line text-xl"></i>
-                  </button>
-                </div>
-              )}
+                )}
 
-              {/* Email Preview or Editor */}
-              {state === 'editing' ? (
-                <EmailEditor
-                  subject={email.subject}
-                  body={email.body}
-                  recipient={email.recipient}
-                  onChange={handleEmailChange}
-                  onSave={handleSaveEdit}
-                  onCancel={handleCancelEdit}
+                {/* Email Preview or Editor */}
+                {state === 'editing' ? (
+                  <EmailEditor
+                    subject={email.subject}
+                    body={email.body}
+                    recipient={email.recipient}
+                    onChange={handleEmailChange}
+                    onSave={handleSaveEdit}
+                    onCancel={handleCancelEdit}
+                  />
+                ) : state === 'schedule-picker' ? (
+                  <SchedulePicker
+                    onSchedule={handleConfirmSchedule}
+                    onCancel={handleCancelDialog}
+                  />
+                ) : (
+                  <EmailPreview
+                    email={email}
+                    onEdit={handleEdit}
+                  />
+                )}
+              </div>
+
+              {/* Sidebar: Send Controls */}
+              <div className="lg:col-span-1">
+                <SendControlPanel
+                  onSendNow={handleSendNow}
+                  onSchedule={handleSchedule}
+                  onDiscard={handleDiscard}
+                  disabled={!gmailConnection.isConnected || isSending}
                 />
-              ) : state === 'schedule-picker' ? (
-                <SchedulePicker
-                  onSchedule={handleConfirmSchedule}
-                  onCancel={handleCancelDialog}
-                />
-              ) : (
-                <EmailPreview
-                  email={email}
-                  onEdit={handleEdit}
-                />
-              )}
+              </div>
             </div>
           )}
 

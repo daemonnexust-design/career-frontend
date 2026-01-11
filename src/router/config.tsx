@@ -14,6 +14,9 @@ const SignupPage = lazy(() => import('../pages/auth/signup/page'));
 const TermsOfServicePage = lazy(() => import('../pages/terms-of-service/page'));
 const PrivacyPolicyPage = lazy(() => import('../pages/privacy-policy/page'));
 const NotFoundPage = lazy(() => import('../pages/NotFound'));
+const NewApplicationPage = lazy(() => import('../pages/application/new/page'));
+const ApplicationsPage = lazy(() => import('../pages/applications/page'));
+
 
 const ProfilePage = lazy(() => import('../pages/profile/page'));
 const VerifyEmailPage = lazy(() => import('../pages/auth/verify-email/page'));
@@ -44,7 +47,16 @@ const routes: RouteObject[] = [
     element: <ProtectedRoute><EmailControlPage /></ProtectedRoute>
   },
   {
+    path: '/application/new',
+    element: <ProtectedRoute><NewApplicationPage /></ProtectedRoute>
+  },
+  {
+    path: '/applications',
+    element: <ProtectedRoute><ApplicationsPage /></ProtectedRoute>
+  },
+  {
     path: '/profile',
+
     element: <ProtectedRoute><ProfilePage /></ProtectedRoute>
   },
   {

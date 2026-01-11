@@ -5,10 +5,9 @@ import { supabase } from '../../../lib/supabase';
 
 interface ActivityLog {
     id: string;
-    action_type: string;
-    title: string | null;
-    created_at: string;
-    metadata: any;
+    type: 'upload' | 'assessment' | 'email';
+    title: string;
+    timestamp: string;
 }
 
 export default function ActivityFeed() {
@@ -24,16 +23,54 @@ export default function ActivityFeed() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            const { data, error } = await supabase
-                .from('activity_logs')
-                .select('*')
+            // 1. Fetch AI Assessments (Audit Logs)
+            const { data: aiLogs } = await supabase
+                .from('ai_audit_logs')
+                .select('id, timestamp, action_type')
                 .eq('user_id', user.id)
-                .order('created_at', { ascending: false })
+                .order('timestamp', { ascending: false })
                 .limit(5);
 
-            if (data) {
-                setActivities(data);
+            // 2. Fetch CV Uploads
+            const { data: cvLogs } = await supabase
+                .from('user_cvs')
+                .select('id, uploaded_at, original_filename')
+                .eq('user_id', user.id)
+                .order('uploaded_at', { ascending: false })
+                .limit(5);
+
+            // 3. Normalize & Merge
+            const normalizedActivities: ActivityLog[] = [];
+
+            if (aiLogs) {
+                aiLogs.forEach(log => {
+                    normalizedActivities.push({
+                        id: log.id,
+                        type: 'assessment',
+                        title: 'AI Personal Assessment',
+                        timestamp: log.timestamp
+                    });
+                });
             }
+
+            if (cvLogs) {
+                cvLogs.forEach(cv => {
+                    normalizedActivities.push({
+                        id: cv.id,
+                        type: 'upload',
+                        title: `Uploaded CV: ${cv.original_filename}`,
+                        timestamp: cv.uploaded_at
+                    });
+                });
+            }
+
+            // 4. Sort & Slice
+            const sorted = normalizedActivities
+                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                .slice(0, 5);
+
+            setActivities(sorted);
+
         } catch (error) {
             console.error('Error fetching activity:', error);
         } finally {
@@ -43,9 +80,9 @@ export default function ActivityFeed() {
 
     const getIconForType = (type: string) => {
         switch (type) {
-            case 'UPLOAD_CV': return { icon: 'ri-file-upload-line', color: 'text-teal-600', bg: 'bg-teal-50' };
-            case 'GENERATE_LETTER': return { icon: 'ri-quill-pen-line', color: 'text-purple-600', bg: 'bg-purple-50' };
-            case 'RESEARCH_COMPANY': return { icon: 'ri-search-line', color: 'text-blue-600', bg: 'bg-blue-50' };
+            case 'upload': return { icon: 'ri-file-upload-line', color: 'text-teal-600', bg: 'bg-teal-50' };
+            case 'assessment': return { icon: 'ri-sparkling-fill', color: 'text-purple-600', bg: 'bg-purple-50' };
+            case 'email': return { icon: 'ri-mail-send-fill', color: 'text-blue-600', bg: 'bg-blue-50' };
             default: return { icon: 'ri-flashlight-line', color: 'text-slate-600', bg: 'bg-slate-50' };
         }
     };
@@ -56,7 +93,6 @@ export default function ActivityFeed() {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-soft p-6">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-slate-900">Recent Activity</h3>
-                <button className="text-sm text-teal-600 hover:text-teal-700 font-medium">View All</button>
             </div>
 
             <div className="space-y-6">
@@ -64,7 +100,7 @@ export default function ActivityFeed() {
                     <p className="text-slate-500 text-sm text-center py-4">No recent activity</p>
                 ) : (
                     activities.map((activity, index) => {
-                        const style = getIconForType(activity.action_type);
+                        const style = getIconForType(activity.type);
                         return (
                             <div key={activity.id} className="flex gap-4 group">
                                 <div className="flex flex-col items-center">
@@ -76,9 +112,9 @@ export default function ActivityFeed() {
                                     )}
                                 </div>
                                 <div className="flex-1 pb-1">
-                                    <h4 className="text-sm font-semibold text-slate-900">{activity.title || activity.action_type}</h4>
+                                    <h4 className="text-sm font-semibold text-slate-900">{activity.title}</h4>
                                     <p className="text-xs text-slate-500 mt-0.5">
-                                        {new Date(activity.created_at).toLocaleDateString()} • {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {new Date(activity.timestamp).toLocaleDateString()} • {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </p>
                                 </div>
                             </div>

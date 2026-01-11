@@ -8,6 +8,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 interface AssessmentRequest {
     cv_text: string;
     job_description?: string;
+    candidate_name?: string;
 }
 
 interface GeminiResponseSchema {
@@ -29,25 +30,25 @@ const CORS_HEADERS = {
 // SYSTEM PROMPT
 // --------------------------------------------------------------------------
 const SYSTEM_PROMPT = `
-You are a Senior Technical Recruiter and AI Assessor.
-Your task is to evaluate a candidate's CV against a Job Description.
+You are an expert Career Coach and Recruiter with 20+ years of experience.
+Your goal is to evaluate a user's CV/Resume against a specific Job Description (or general quality standards) and provide supportive, actionable feedback.
 
-EXECUTION RULES:
-1. Output MUST be valid JSON only. No markdown formatting.
-2. Adhere strictly to the JSON schema.
-3. If qualification_score < 40, cover_letter and email_draft MUST be null.
-4. "warnings" array must list any red flags or missing critical skills.
-5. "improvement_suggestions" must contain 3-5 specific, actionable bullet points to improve the CV.
+TONE & STYLE:
+- Speak directly to the user as "You" (never use "The candidate").
+- Be encouraging but honest and direct.
+- Use a professional yet accessible "Career Coach" persona.
+- If the user's name is provided, use it occasionally to personalize the feedback (e.g., "John, your experience in...").
 
-JSON SCHEMA:
+OUTPUT FORMAT:
+Return ONLY valid JSON matching this schema:
 {
-  "qualification_score": number, // 0-100
-  "match_level": "poor" | "fair" | "strong",
-  "reasoning": string[],
-  "cover_letter": string | null, // valid HTML string or null
-  "email_draft": string | null, // plain text or null
-  "warnings": string[],
-  "improvement_suggestions": string[] // actionable advice to increase score
+    "qualification_score": number, // 0-100
+    "match_level": "poor" | "fair" | "strong",
+    "reasoning": string[], // 3-5 bullet points explaining the score (Use "You")
+    "cover_letter": string | null, // valid HTML string (if score >= 40)
+    "email_draft": string | null, // plain text (if score >= 40)
+    "warnings": string[], // Critical missing keywords or red flags (Use "You")
+    "improvement_suggestions": string[] // 3-5 actionable tips to improve (Use "You")
 }
 `;
 
@@ -92,11 +93,11 @@ serve(async (req) => {
                 hasAnon: !!supabaseAnonKey,
                 authHeaderLen: authHeader?.length
             });
-            throw new Error(`Unauthorized: ${userError?.message || 'No User Found'}`);
+            throw new Error(`Unauthorized: ${userError?.message || 'No User Found'} `);
         }
 
         // 3. Parse Input
-        let { cv_text, job_description } = await req.json() as AssessmentRequest;
+        let { cv_text, job_description, candidate_name } = await req.json() as AssessmentRequest;
         if (!cv_text) throw new Error('Missing cv_text');
 
         // Default to General Analysis if no job description provided
@@ -105,13 +106,13 @@ serve(async (req) => {
             ASSESSMENT CONTEXT: GENERAL PROFESSIONAL QUALITY CHECK
             
             Since no specific job description was provided, evaluate the candidate's CV based on general employability standards:
-            1. Clarity, Structure, and Formatting.
-            2. Presence of strong metrics and results (Action verbs, quantified impact).
+1. Clarity, Structure, and Formatting.
+            2. Presence of strong metrics and results(Action verbs, quantified impact).
             3. Professional tone and grammar.
             4. Effective presentation of skills.
 
             SCHEMA MAPPING GUIDANCE:
-            - "match_level": "strong" (Top tier, highly employable), "fair" (Average, needs work), "poor" (Weak, significant issues).
+- "match_level": "strong"(Top tier, highly employable), "fair"(Average, needs work), "poor"(Weak, significant issues).
             - "qualification_score": Rate the overall quality out of 100.
             `;
         }
@@ -125,6 +126,10 @@ serve(async (req) => {
         const startTime = Date.now();
 
         const prompt = `
+<<<CANDIDATE_INFO>>>
+Name: ${candidate_name || "The Candidate"}
+<<<CANDIDATE_INFO>>>
+
 <<<CV_DATA>>>
 ${cv_text.substring(0, 20000)} -- Truncated for safety
 <<<CV_DATA>>>

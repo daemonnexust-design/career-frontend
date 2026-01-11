@@ -114,8 +114,11 @@ export function CVManager() {
             return;
         }
 
+        const candidateName = user?.user_metadata?.full_name || user?.email?.split('@')[0];
+
         await assessCandidate({
-            cv_text: textToAnalyze
+            cv_text: textToAnalyze,
+            candidate_name: candidateName
         });
     };
 

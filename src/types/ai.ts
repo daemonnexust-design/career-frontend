@@ -11,6 +11,7 @@ export interface AIAssessmentResponse {
 export interface AssessmentRequest {
     cv_text: string;
     job_description?: string;
+    candidate_name?: string;
 }
 
 export interface AssessmentError {

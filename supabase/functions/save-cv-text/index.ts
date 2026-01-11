@@ -74,7 +74,7 @@ serve(async (req) => {
                 .insert({
                     user_id: user.id,
                     file_path: 'text-only',
-                    original_filename: 'cv_text_entry',
+                    original_filename: 'Manual Entry Profile',
                     cv_text
                 })
                 .select()

@@ -28,18 +28,24 @@ export function ProfileForm() {
                 .from('profiles')
                 .select('full_name, headline, bio, location, experience_level')
                 .eq('id', user?.id)
-                .single();
+                .maybeSingle();
 
             if (error) throw error;
 
             if (data) {
                 setFormData({
-                    full_name: data.full_name || '',
+                    full_name: data.full_name || user?.user_metadata?.full_name || '',
                     headline: data.headline || '',
                     bio: data.bio || '',
                     location: data.location || '',
                     experience_level: data.experience_level || 'mid'
                 });
+            } else if (user) {
+                // Initial fallback from auth metadata
+                setFormData(prev => ({
+                    ...prev,
+                    full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || ''
+                }));
             }
         } catch (error: any) {
             console.error('Error fetching profile:', error.message);
@@ -63,8 +69,11 @@ export function ProfileForm() {
 
             const { error } = await supabase
                 .from('profiles')
-                .update(formData)
-                .eq('id', user?.id);
+                .upsert({
+                    id: user?.id,
+                    ...formData,
+                    updated_at: new Date().toISOString()
+                });
 
             if (error) throw error;
 

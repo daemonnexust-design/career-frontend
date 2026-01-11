@@ -33,7 +33,7 @@ export default function HomePage() {
                 Research
               </Link>
               <Link
-                to="/upload-cv"
+                to="/application/new"
                 className="px-4 py-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-teal-500/20 transition-all"
               >
                 <i className="ri-add-line mr-2"></i>
@@ -83,7 +83,7 @@ export default function HomePage() {
               <section>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-slate-900">Recent Applications</h2>
-                  <button className="text-sm text-teal-600 hover:text-teal-700 font-medium">View All</button>
+                  <Link to="/applications" className="text-sm text-teal-600 hover:text-teal-700 font-medium">View All</Link>
                 </div>
                 <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
                   <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
