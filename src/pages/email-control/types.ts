@@ -9,19 +9,14 @@ export interface EmailDraft {
   scheduledFor?: Date;
 }
 
-export interface GmailConnection {
-  isConnected: boolean;
-  email?: string; // mock email when connected
-}
-
-export type EmailControlState = 
-  | 'idle' 
-  | 'generating' 
-  | 'preview' 
-  | 'editing' 
-  | 'schedule-picker' 
-  | 'confirm-send' 
-  | 'confirm-schedule' 
-  | 'confirm-discard' 
-  | 'sent' 
+export type EmailControlState =
+  | 'idle'
+  | 'generating'
+  | 'preview'
+  | 'editing'
+  | 'schedule-picker'
+  | 'confirm-send'
+  | 'confirm-schedule'
+  | 'confirm-discard'
+  | 'sent'
   | 'scheduled';

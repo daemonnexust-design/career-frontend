@@ -8,15 +8,19 @@ import SendControlPanel from './components/SendControlPanel';
 import SchedulePicker from './components/SchedulePicker';
 import ConfirmationDialog from '../../components/base/ConfirmationDialog';
 import { generateMockEmail } from './utils/mockEmailGenerator';
-import { EmailDraft, GmailConnection, EmailControlState } from './types';
+import { EmailDraft, EmailControlState } from './types';
+import { useGmailConnection } from '../../hooks/useGmailConnection';
+import { supabase } from '../../lib/supabase';
 
 export default function EmailControlPage() {
   const [state, setState] = useState<EmailControlState>('idle');
   const [email, setEmail] = useState<EmailDraft | null>(null);
-  const [gmailConnection, setGmailConnection] = useState<GmailConnection>({
-    isConnected: false
-  });
   const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
+
+  // Real Gmail connection hook
+  const gmailConnection = useGmailConnection();
 
   // Generate email handler
   const handleGenerate = () => {
@@ -28,15 +32,9 @@ export default function EmailControlPage() {
     }, 500);
   };
 
-  // Gmail connection handler
+  // Gmail connection handler - now uses real OAuth
   const handleConnectGmail = () => {
-    // Mock connection with 1 second delay
-    setTimeout(() => {
-      setGmailConnection({
-        isConnected: true,
-        email: 'demo@gmail.com'
-      });
-    }, 1000);
+    gmailConnection.connectGmail();
   };
 
   // Edit handlers
@@ -63,8 +61,32 @@ export default function EmailControlPage() {
     setState('confirm-send');
   };
 
-  const handleConfirmSend = () => {
-    setState('sent');
+  const handleConfirmSend = async () => {
+    if (!email || !gmailConnection.isConnected) return;
+
+    setIsSending(true);
+    setSendError(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-email', {
+        body: {
+          recipient: email.recipient,
+          subject: email.subject,
+          body: email.body,
+        },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Failed to send email');
+
+      setState('sent');
+    } catch (err: any) {
+      console.error('Send error:', err);
+      setSendError(err.message || 'Failed to send email');
+      setState('preview'); // Return to preview on error
+    } finally {
+      setIsSending(false);
+    }
   };
 
   // Schedule handlers
@@ -111,7 +133,7 @@ export default function EmailControlPage() {
         {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(20,184,166,0.15),transparent_50%)]"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(59,130,246,0.1),transparent_50%)]"></div>
-        
+
         {/* Animated Gradient Orbs */}
         <div className="absolute top-1/4 left-1/4 w-32 md:w-64 h-32 md:h-64 bg-teal-500/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-1/4 right-1/4 w-32 md:w-64 h-32 md:h-64 bg-emerald-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
@@ -120,7 +142,7 @@ export default function EmailControlPage() {
         <div className="absolute inset-0 opacity-[0.015]">
           <svg width="100%" height="100%">
             <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-              <path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" strokeWidth="1"/>
+              <path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" strokeWidth="1" />
             </pattern>
             <rect width="100%" height="100%" fill="url(#grid)" />
           </svg>
@@ -169,15 +191,15 @@ export default function EmailControlPage() {
       <section className="py-8 md:py-12 px-4 sm:px-6 lg:px-8 bg-slate-50">
         <div className="max-w-5xl mx-auto">
           {state === 'idle' && (
-            <GenerateEmailButton 
-              onGenerate={handleGenerate} 
+            <GenerateEmailButton
+              onGenerate={handleGenerate}
               disabled={false}
             />
           )}
 
           {state === 'generating' && (
-            <GenerateEmailButton 
-              onGenerate={handleGenerate} 
+            <GenerateEmailButton
+              onGenerate={handleGenerate}
               disabled={true}
             />
           )}
@@ -185,10 +207,29 @@ export default function EmailControlPage() {
           {(state === 'preview' || state === 'editing' || state === 'schedule-picker') && email && (
             <div className="space-y-4 md:space-y-6">
               {/* Gmail Connection Status */}
-              <GmailConnectionStatus 
-                connection={gmailConnection}
+              <GmailConnectionStatus
+                isConnected={gmailConnection.isConnected}
+                email={gmailConnection.email}
+                loading={gmailConnection.loading}
                 onConnect={handleConnectGmail}
               />
+
+              {/* Send Error Message */}
+              {sendError && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+                  <i className="ri-error-warning-line text-red-500 text-xl"></i>
+                  <div>
+                    <p className="font-semibold text-red-700">Failed to send email</p>
+                    <p className="text-sm text-red-600">{sendError}</p>
+                  </div>
+                  <button
+                    onClick={() => setSendError(null)}
+                    className="ml-auto text-red-400 hover:text-red-600"
+                  >
+                    <i className="ri-close-line text-xl"></i>
+                  </button>
+                </div>
+              )}
 
               {/* Email Preview or Editor */}
               {state === 'editing' ? (
@@ -225,14 +266,12 @@ export default function EmailControlPage() {
                 {state === 'sent' ? 'Email Sent Successfully!' : 'Email Scheduled!'}
               </h3>
               <p className="text-sm sm:text-base md:text-lg text-slate-600 mb-6 md:mb-8 max-w-2xl mx-auto">
-                {state === 'sent' 
+                {state === 'sent'
                   ? 'Your application email has been sent.'
                   : `Your email will be sent on ${scheduledDate?.toLocaleString()}`
                 }
               </p>
-              <p className="text-sm text-gray-500 italic mb-8">
-                (Mock — no real email was {state === 'sent' ? 'sent' : 'scheduled'})
-              </p>
+
               <button
                 onClick={() => {
                   setEmail(null);

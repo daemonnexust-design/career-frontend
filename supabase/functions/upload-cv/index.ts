@@ -29,20 +29,22 @@ serve(async (req) => {
             throw new Error(`Server Config Error: URL=${!!supabaseUrl}, KEY=${!!supabaseAnonKey}`);
         }
 
+        // Extract the JWT token from the Authorization header
+        const token = authHeader.replace('Bearer ', '');
+
         const supabaseClient = createClient(
             supabaseUrl,
             supabaseAnonKey,
             {
-                global: { headers: { Authorization: authHeader } },
-                auth: { persistSession: false }
+                global: { headers: { Authorization: authHeader } }
             }
         );
 
-        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+        // Pass the token directly to getUser() - required for Edge Functions
+        const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
         if (userError || !user) {
             console.error('User verification failed:', userError);
-            // Distinct error message to confirm code version
-            throw new Error(`DEBUG_AUTH_FAIL: ${userError?.message || 'No User'} | Project: ${supabaseUrl}`);
+            throw new Error(`Auth failed: ${userError?.message || 'No user found'}`);
         }
         console.log('User verified:', user.id);
 

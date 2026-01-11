@@ -10,50 +10,88 @@ serve(async (req) => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
     try {
+        console.log('--- Download CV Start ---');
+
         const authHeader = req.headers.get('Authorization');
+        console.log('Auth header present:', !!authHeader);
+
         if (!authHeader) throw new Error('Missing Authorization header');
 
+        // Extract the JWT token from the Authorization header
+        const token = authHeader.replace('Bearer ', '');
+
+        const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+        const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+
+        console.log('Supabase URL configured:', !!supabaseUrl);
+        console.log('Supabase Anon Key configured:', !!supabaseAnonKey);
+
         const supabaseClient = createClient(
-            Deno.env.get('SUPABASE_URL') ?? '',
-            Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+            supabaseUrl,
+            supabaseAnonKey,
             { global: { headers: { Authorization: authHeader } } }
         );
 
-        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-        if (userError || !user) throw new Error('Unauthorized');
+        // Pass the token directly to getUser() - required for Edge Functions
+        const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+
+        if (userError) {
+            console.error('User auth error:', userError.message);
+            throw new Error(`Auth failed: ${userError.message}`);
+        }
+
+        if (!user) {
+            console.error('No user returned from getUser()');
+            throw new Error('Unauthorized: No user found');
+        }
+
+        console.log('User verified:', user.id);
 
         // Admin client to sign URL (Private Bucket)
         const supabaseAdmin = createClient(
-            Deno.env.get('SUPABASE_URL') ?? '',
+            supabaseUrl,
             Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         );
 
         const filePath = `${user.id}/cv.pdf`;
+        console.log('Looking for file:', filePath);
 
-        // Check if file exists first?
-        // Storage list
-        const { data: files } = await supabaseAdmin.storage.from('cv-uploads').list(user.id);
+        // Check if file exists first
+        const { data: files, error: listError } = await supabaseAdmin.storage.from('cv-uploads').list(user.id);
+
+        if (listError) {
+            console.error('Storage list error:', listError);
+            throw new Error(`Storage error: ${listError.message}`);
+        }
+
+        console.log('Files found in user folder:', files?.map(f => f.name));
         const hasCV = files?.find(f => f.name === 'cv.pdf');
 
         if (!hasCV) {
-            throw new Error('CV not found');
+            console.log('CV file not found in storage');
+            throw new Error('CV not found in storage. Please upload a CV first.');
         }
 
         const { data, error } = await supabaseAdmin
             .storage
             .from('cv-uploads')
-            .createSignedUrl(filePath, 60); // 60 seconds expiry
+            .createSignedUrl(filePath, 60);
 
-        if (error) throw error;
+        if (error) {
+            console.error('Signed URL error:', error);
+            throw error;
+        }
 
+        console.log('Signed URL created successfully');
         return new Response(
             JSON.stringify({ success: true, signedUrl: data.signedUrl }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
 
-    } catch (error) {
+    } catch (error: any) {
+        console.error('--- Download CV Error ---', error);
         return new Response(
-            JSON.stringify({ success: false, error: error.message }),
+            JSON.stringify({ success: false, error: error.message || 'Unknown error' }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
     }
