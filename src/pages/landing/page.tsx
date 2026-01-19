@@ -10,7 +10,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (user) {
-      navigate('/home');
+      navigate('/dashboard');
     }
   }, [user, navigate]);
 
@@ -89,24 +89,24 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-navy-950 text-white selection:bg-accent-yellow/30">
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-md' : 'bg-transparent'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-navy-900/80 backdrop-blur-md border-b border-white/5 shadow-lg' : 'bg-transparent'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to={user ? "/home" : "/"} className="flex items-center gap-2 sm:gap-3">
+            <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2 sm:gap-3">
               <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg sm:rounded-xl flex items-center justify-center">
                 <i className="ri-briefcase-line text-lg sm:text-xl text-white"></i>
               </div>
-              <span className={`text-lg sm:text-xl font-bold transition-colors ${scrolled ? 'text-gray-900' : 'text-white'}`}>Career Assistant</span>
+              <span className={`text-lg sm:text-xl font-bold font-serif tracking-tight transition-colors ${scrolled ? 'text-white' : 'text-white'}`}>Career Assistant</span>
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden sm:flex items-center gap-4">
               {user ? (
                 <Link
-                  to="/home"
+                  to="/dashboard"
                   className="px-6 py-2 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-medium hover:from-teal-600 hover:to-teal-700 transition-all shadow-lg hover:shadow-xl whitespace-nowrap cursor-pointer"
                 >
                   Go to Dashboard
@@ -115,13 +115,13 @@ export default function LandingPage() {
                 <>
                   <Link
                     to="/login"
-                    className={`px-6 py-2 rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer ${scrolled ? 'text-gray-700 hover:text-teal-600' : 'text-white hover:text-teal-200'}`}
+                    className={`px-6 py-2 rounded-full font-medium transition-all whitespace-nowrap cursor-pointer hover:text-accent-yellow text-white`}
                   >
                     Log In
                   </Link>
                   <Link
                     to="/signup"
-                    className="px-6 py-2 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-medium hover:from-teal-600 hover:to-teal-700 transition-all shadow-lg hover:shadow-xl whitespace-nowrap cursor-pointer"
+                    className="btn-primary shadow-lg hover:shadow-accent-yellow/50 whitespace-nowrap cursor-pointer"
                   >
                     Get Started
                   </Link>
@@ -166,7 +166,7 @@ export default function LandingPage() {
             <div className="flex-1 flex flex-col justify-center px-4 py-8 space-y-4">
               {user ? (
                 <Link
-                  to="/home"
+                  to="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-full px-6 py-3 text-center bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-medium hover:from-teal-600 hover:to-teal-700 transition-all shadow-lg cursor-pointer"
                 >
@@ -214,14 +214,14 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/60 sm:from-black/50 sm:via-black/40 sm:to-black/50"></div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-32 text-center w-full">
-          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-sm rounded-full text-white text-xs sm:text-sm font-medium mb-6 sm:mb-8">
-            <i className="ri-sparkle-line"></i>
-            <span>AI-Powered Career Tools</span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-accent-yellow text-xs sm:text-sm font-medium mb-8">
+            <i className="ri-sparkle-fill"></i>
+            <span className="tracking-wide uppercase text-[10px] sm:text-xs font-bold">AI-Powered Career Tools</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight px-4">
+          <h1 className="heading-hero mb-6 px-4">
             Land Your Dream Job<br />
-            <span className="text-teal-400">Faster & Smarter</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-yellow to-yellow-200">Faster & Smarter</span>
           </h1>
 
           <p className="text-base sm:text-xl md:text-2xl text-white/90 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4">
@@ -232,7 +232,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4">
             {user ? (
               <Link
-                to="/home"
+                to="/dashboard"
                 className="w-full sm:w-auto px-10 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-semibold text-base sm:text-lg hover:from-teal-600 hover:to-teal-700 transition-all shadow-2xl hover:shadow-teal-500/50 whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
               >
                 Back to Dashboard
@@ -242,14 +242,14 @@ export default function LandingPage() {
               <>
                 <Link
                   to="/signup"
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-semibold text-base sm:text-lg hover:from-teal-600 hover:to-teal-700 transition-all shadow-2xl hover:shadow-teal-500/50 whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto btn-primary text-base sm:text-lg shadow-2xl hover:shadow-accent-yellow/40 whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Start Free Today
                   <i className="ri-arrow-right-line"></i>
                 </Link>
                 <Link
                   to="/login"
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg font-semibold text-base sm:text-lg hover:bg-white/20 transition-all border border-white/20 whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-8 py-3 rounded-pill bg-white/5 backdrop-blur-sm text-white font-semibold text-base sm:text-lg hover:bg-white/10 transition-all border border-white/10 whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer hover:border-accent-yellow/50"
                 >
                   <i className="ri-login-box-line"></i>
                   Log In
@@ -276,17 +276,16 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 sm:py-24 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="py-12 sm:py-24 bg-navy-950 relative">
+        {/* Glow effect */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-96 bg-accent-purple/20 blur-[120px] rounded-full pointer-events-none"></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
           <div className="text-center mb-8 sm:mb-16">
-            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-teal-50 rounded-full text-teal-600 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
-              <i className="ri-star-line"></i>
-              <span>Powerful Features</span>
-            </div>
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 px-4">
+            <h2 className="heading-section mb-3 sm:mb-4 px-4">
               Everything You Need to Succeed
             </h2>
-            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto px-4">
+            <p className="text-base sm:text-xl text-gray-400 max-w-2xl mx-auto px-4">
               Comprehensive tools designed to streamline your job search and maximize your chances of success.
             </p>
           </div>
@@ -295,26 +294,27 @@ export default function LandingPage() {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-2 cursor-pointer overflow-hidden"
+                className="group relative card-glass hover:-translate-y-2 cursor-pointer overflow-hidden border-white/5"
               >
                 {/* Image Section */}
                 <div className="relative h-40 sm:h-48 overflow-hidden">
+                  <div className="absolute inset-0 bg-navy-900/20 z-10"></div>
                   <img
                     src={feature.image}
                     alt={feature.title}
-                    className="w-full h-full object-cover object-center"
+                    className="w-full h-full object-cover object-center opacity-80 group-hover:opacity-100 transition-opacity"
                   />
 
                   {/* Icon Overlay */}
-                  <div className="absolute top-4 left-4 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <i className={`${feature.icon} text-xl sm:text-2xl text-white`}></i>
+                  <div className="absolute top-4 left-4 w-12 h-12 sm:w-14 sm:h-14 bg-accent-yellow rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform z-20">
+                    <i className={`${feature.icon} text-xl sm:text-2xl text-navy-950`}></i>
                   </div>
                 </div>
 
                 {/* Content Section */}
                 <div className="p-6 sm:p-8">
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">{feature.title}</h3>
-                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{feature.description}</p>
+                  <h3 className="text-lg sm:text-xl font-bold font-serif text-white mb-2 sm:mb-3">{feature.title}</h3>
+                  <p className="text-sm sm:text-base text-gray-400 leading-relaxed">{feature.description}</p>
                 </div>
               </div>
             ))}
@@ -323,13 +323,13 @@ export default function LandingPage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 bg-navy-900 relative border-t border-white/5">
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 px-4">
+            <h2 className="heading-section mb-3 sm:mb-4 px-4">
               Your Success is Our Mission
             </h2>
-            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto px-4">
+            <p className="text-base sm:text-xl text-gray-400 max-w-2xl mx-auto px-4">
               We combine cutting-edge AI technology with proven career strategies to give you the competitive edge.
             </p>
           </div>
@@ -360,7 +360,7 @@ export default function LandingPage() {
                 return (
                   <div
                     key={index}
-                    className={`group relative w-64 sm:w-auto flex-shrink-0 bg-white rounded-2xl border ${borderColors[index]} shadow-lg hover:shadow-2xl transition-all hover:scale-105 overflow-hidden cursor-pointer`}
+                    className={`group relative w-64 sm:w-auto flex-shrink-0 card-glass border-white/5 hover:border-accent-yellow/30 shadow-lg hover:shadow-2xl transition-all hover:scale-105 overflow-hidden cursor-pointer`}
                   >
                     {/* Image Background */}
                     <div className="relative h-40 sm:h-48 overflow-hidden">
@@ -373,10 +373,10 @@ export default function LandingPage() {
 
                     {/* Content */}
                     <div className="p-5 sm:p-6">
-                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 text-center">
+                      <h3 className="text-lg sm:text-xl font-bold font-serif text-white mb-2 text-center">
                         {benefit.title}
                       </h3>
-                      <p className="text-sm sm:text-base text-gray-600 text-center leading-relaxed">
+                      <p className="text-sm sm:text-base text-gray-400 text-center leading-relaxed">
                         {benefit.description}
                       </p>
                     </div>
@@ -399,17 +399,17 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-24 bg-gradient-to-br from-teal-500 to-teal-600 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+      <section className="py-12 sm:py-24 bg-gradient-to-br from-navy-900 to-navy-950 relative overflow-hidden border-t border-white/5">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-accent-purple/40 rounded-full blur-[100px]"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent-yellow/20 rounded-full blur-[100px]"></div>
         </div>
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6">
+          <h2 className="heading-section mb-4 sm:mb-6">
             Ready to Transform Your Career?
           </h2>
-          <p className="text-base sm:text-xl text-white/90 mb-8 sm:mb-12 leading-relaxed">
+          <p className="text-base sm:text-xl text-gray-300 mb-8 sm:mb-12 leading-relaxed">
             Join thousands of job seekers who are already using Career Assistant to land their dream jobs.
             Start your journey today - it's free to get started!
           </p>
@@ -417,8 +417,8 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             {user ? (
               <Link
-                to="/home"
-                className="w-full sm:w-auto px-10 sm:px-12 py-3 sm:py-4 bg-white text-teal-600 rounded-lg font-semibold text-base sm:text-lg hover:bg-gray-50 transition-all shadow-xl hover:shadow-2xl whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
+                to="/dashboard"
+                className="w-full sm:w-auto btn-primary text-base sm:text-lg hover:bg-gray-50 transition-all shadow-xl hover:shadow-2xl whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
               >
                 Enter Dashboard
                 <i className="ri-dashboard-line"></i>
@@ -427,14 +427,14 @@ export default function LandingPage() {
               <>
                 <Link
                   to="/signup"
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white text-teal-600 rounded-lg font-semibold text-base sm:text-lg hover:bg-gray-50 transition-all shadow-xl hover:shadow-2xl whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto btn-primary text-base sm:text-lg shadow-xl hover:shadow-2xl whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Create Free Account
                   <i className="ri-arrow-right-line"></i>
                 </Link>
                 <Link
                   to="/login"
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg font-semibold text-base sm:text-lg hover:bg-white/20 transition-all border border-white/20 whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-8 py-3 rounded-pill bg-white/5 backdrop-blur-sm text-white font-semibold text-base sm:text-lg hover:bg-white/10 transition-all border border-white/10 whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <i className="ri-login-box-line"></i>
                   Already have an account?
@@ -461,10 +461,10 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 sm:py-12">
+      <footer className="bg-navy-950 text-white py-8 sm:py-12 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <Link to={user ? "/home" : "/"} className="flex items-center gap-2 sm:gap-3 transition-transform hover:scale-105">
+            <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2 sm:gap-3 transition-transform hover:scale-105">
               <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg sm:rounded-xl flex items-center justify-center">
                 <i className="ri-briefcase-line text-lg sm:text-xl text-white"></i>
               </div>

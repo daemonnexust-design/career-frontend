@@ -2,22 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+
 @layer base {
+  :root {
+    --bg-app: #0F1020;
+    --bg-surface: #181834;
+    --text-main: #FFFFFF;
+    --text-muted: #94A3B8;
+  }
+
   body {
-    @apply antialiased;
+    @apply bg-navy-950 text-white font-sans antialiased selection:bg-accent-yellow/30 leading-relaxed;
+    background-image: radial-gradient(circle at 50% 0%, #1D1D44 0%, #0F1020 70%);
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif text-white;
+  }
+}
+
+@layer components {
+
+  /* Premium Button - Teal/Emerald Style */
+  .btn-primary {
+    @apply relative inline-flex items-center justify-center bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-bold uppercase tracking-wide px-8 py-3 rounded-pill transition-all duration-300 hover:shadow-[0_0_20px_#14b8a680] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Glass Card - Financial Surface */
+  .card-glass {
+    @apply bg-navy-900/60 backdrop-blur-xl border border-white/10 rounded-card shadow-xl shadow-black/20;
+  }
+
+  /* Typography Utilities */
+  .heading-hero {
+    @apply font-serif text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.1];
+  }
+
+  .heading-section {
+    @apply font-serif text-3xl md:text-4xl font-semibold tracking-normal text-white;
   }
 }
 
 @layer utilities {
   .transition-smooth {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .shadow-soft {
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-  }
-  
-  .shadow-soft-lg {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   }
 }

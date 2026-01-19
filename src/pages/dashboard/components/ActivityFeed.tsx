@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
+import Card from '../../../components/ui/Card';
 
 interface ActivityLog {
     id: string;
@@ -80,24 +81,24 @@ export default function ActivityFeed() {
 
     const getIconForType = (type: string) => {
         switch (type) {
-            case 'upload': return { icon: 'ri-file-upload-line', color: 'text-teal-600', bg: 'bg-teal-50' };
-            case 'assessment': return { icon: 'ri-sparkling-fill', color: 'text-purple-600', bg: 'bg-purple-50' };
-            case 'email': return { icon: 'ri-mail-send-fill', color: 'text-blue-600', bg: 'bg-blue-50' };
-            default: return { icon: 'ri-flashlight-line', color: 'text-slate-600', bg: 'bg-slate-50' };
+            case 'upload': return { icon: 'ri-file-upload-line', color: 'text-accent-cyan', bg: 'bg-accent-cyan/10' };
+            case 'assessment': return { icon: 'ri-sparkling-fill', color: 'text-accent-purple', bg: 'bg-accent-purple/10' };
+            case 'email': return { icon: 'ri-mail-send-fill', color: 'text-accent-yellow', bg: 'bg-accent-yellow/10' };
+            default: return { icon: 'ri-flashlight-line', color: 'text-gray-400', bg: 'bg-white/5' };
         }
     };
 
-    if (loading) return <div className="h-48 flex items-center justify-center"><div className="w-6 h-6 border-2 border-teal-500 border-t-transparent rounded-full animate-spin"></div></div>;
+    if (loading) return <div className="h-48 flex items-center justify-center"><div className="w-6 h-6 border-2 border-accent-yellow border-t-transparent rounded-full animate-spin"></div></div>;
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-soft p-6">
+        <Card>
             <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-slate-900">Recent Activity</h3>
+                <h3 className="text-lg font-bold font-serif text-white">Recent Activity</h3>
             </div>
 
             <div className="space-y-6">
                 {activities.length === 0 ? (
-                    <p className="text-slate-500 text-sm text-center py-4">No recent activity</p>
+                    <p className="text-gray-400 text-sm text-center py-4">No recent activity</p>
                 ) : (
                     activities.map((activity, index) => {
                         const style = getIconForType(activity.type);
@@ -108,12 +109,12 @@ export default function ActivityFeed() {
                                         <i className={style.icon}></i>
                                     </div>
                                     {index !== activities.length - 1 && (
-                                        <div className="w-0.5 flex-1 bg-slate-100 my-2"></div>
+                                        <div className="w-0.5 flex-1 bg-white/10 my-2"></div>
                                     )}
                                 </div>
                                 <div className="flex-1 pb-1">
-                                    <h4 className="text-sm font-semibold text-slate-900">{activity.title}</h4>
-                                    <p className="text-xs text-slate-500 mt-0.5">
+                                    <h4 className="text-sm font-semibold text-white">{activity.title}</h4>
+                                    <p className="text-xs text-gray-500 mt-0.5">
                                         {new Date(activity.timestamp).toLocaleDateString()} • {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </p>
                                 </div>
@@ -122,6 +123,6 @@ export default function ActivityFeed() {
                     })
                 )}
             </div>
-        </div>
+        </Card>
     );
 }

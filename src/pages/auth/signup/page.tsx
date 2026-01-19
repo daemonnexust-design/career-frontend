@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
+import { useAuth } from '../../../hooks/useAuth';
+import { useEffect } from 'react';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -12,6 +14,13 @@ export default function SignupPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -61,7 +70,7 @@ export default function SignupPage() {
       if (signUpError) throw signUpError;
 
       if (data.user) {
-        navigate('/home');
+        navigate('/dashboard');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to create account. Please try again.');
@@ -76,7 +85,7 @@ export default function SignupPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/home`
+          redirectTo: `${window.location.origin}/dashboard`
         }
       });
       if (error) throw error;

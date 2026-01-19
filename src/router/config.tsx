@@ -5,6 +5,8 @@ import ProtectedRoute from '../components/feature/ProtectedRoute';
 
 const LandingPage = lazy(() => import('../pages/landing/page'));
 const HomePage = lazy(() => import('../pages/home/page'));
+const WheelHomePage = lazy(() => import('../pages/home/WheelHome'));
+const InterviewPrepPage = lazy(() => import('../pages/interview-prep/page'));
 const UploadCVPage = lazy(() => import('../pages/upload-cv/page'));
 const CompanyResearchPage = lazy(() => import('../pages/company-research/page'));
 const CoverLetterPage = lazy(() => import('../pages/cover-letter/page'));
@@ -24,11 +26,19 @@ const VerifyEmailPage = lazy(() => import('../pages/auth/verify-email/page'));
 const routes: RouteObject[] = [
   {
     path: '/',
-    element: <LandingPage />
+    element: <WheelHomePage /> // Main landing/home page (public)
   },
   {
     path: '/home',
-    element: <ProtectedRoute><HomePage /></ProtectedRoute>
+    element: <WheelHomePage /> // Alias for /
+  },
+  {
+    path: '/dashboard',
+    element: <ProtectedRoute><HomePage /></ProtectedRoute> // Old Dashboard (protected)
+  },
+  {
+    path: '/interview-prep',
+    element: <ProtectedRoute><InterviewPrepPage /></ProtectedRoute>
   },
   {
     path: '/upload-cv',

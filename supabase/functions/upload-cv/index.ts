@@ -59,6 +59,7 @@ serve(async (req) => {
         }
 
         const file = formData.get('file');
+        const cv_text = formData.get('cv_text') as string | null;
 
         if (!file) {
             console.error('No file provided in FormData');
@@ -102,7 +103,9 @@ serve(async (req) => {
             serviceRoleKey
         );
 
-        const filePath = `${user.id}/cv.pdf`;
+        // Derive extension from filename
+        const extension = fileName.split('.').pop()?.toLowerCase() || (fileType === 'application/pdf' ? 'pdf' : 'docx');
+        const filePath = `${user.id}/cv.${extension}`;
 
         // Robust buffer reading
         let fileBuffer;
@@ -142,18 +145,24 @@ serve(async (req) => {
         let result;
         if (existing) {
             console.log('Updating existing record:', existing.id);
-            result = await supabaseAdmin.from('user_cvs').update({
+            const updateData: any = {
                 file_path: filePath,
                 original_filename: fileName,
                 uploaded_at: new Date().toISOString()
-            }).eq('id', existing.id).select().single();
+            };
+            if (cv_text) updateData.cv_text = cv_text;
+
+            result = await supabaseAdmin.from('user_cvs').update(updateData).eq('id', existing.id).select().single();
         } else {
             console.log('Inserting new record for user:', user.id);
-            result = await supabaseAdmin.from('user_cvs').insert({
+            const insertData: any = {
                 user_id: user.id,
                 file_path: filePath,
                 original_filename: fileName
-            }).select().single();
+            };
+            if (cv_text) insertData.cv_text = cv_text;
+
+            result = await supabaseAdmin.from('user_cvs').insert(insertData).select().single();
         }
 
         if (result.error) {

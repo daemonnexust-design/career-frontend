@@ -5,12 +5,14 @@ import FileUploadZone from './components/FileUploadZone';
 import FilePreview from './components/FilePreview';
 import { validateFile } from './utils/fileValidation';
 import { UploadedCV } from './types';
+import { supabase } from '../../lib/supabase';
 
 export default function UploadCVPage() {
   const [uploadedCV, setUploadedCV] = useState<UploadedCV | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [uploading, setUploading] = useState(false);
 
-  const handleFileSelect = (file: File) => {
+  const handleFileSelect = async (file: File) => {
     // Immediate client-side validation
     const validation = validateFile(file);
 
@@ -20,21 +22,47 @@ export default function UploadCVPage() {
       return;
     }
 
-    // Determine file type
-    const fileName = file.name.toLowerCase();
-    const fileType: 'pdf' | 'docx' = fileName.endsWith('.pdf') ? 'pdf' : 'docx';
-
-    // Success state
-    const cv: UploadedCV = {
-      file,
-      name: file.name,
-      size: file.size,
-      type: fileType,
-      uploadedAt: new Date()
-    };
-
-    setUploadedCV(cv);
+    setUploading(true);
     setErrorMessage('');
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const { data, error } = await supabase.functions.invoke('upload-cv', {
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Upload failed');
+
+      // Determine file type
+      const fileName = file.name.toLowerCase();
+      const fileType: 'pdf' | 'docx' = fileName.endsWith('.pdf') ? 'pdf' : 'docx';
+
+      // Success state
+      const cv: UploadedCV = {
+        file,
+        name: file.name,
+        size: file.size,
+        type: fileType,
+        uploadedAt: new Date()
+      };
+
+      setUploadedCV(cv);
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      setErrorMessage(err.message || 'Failed to upload CV. Please try again.');
+      setUploadedCV(null);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleRemove = () => {
@@ -95,7 +123,7 @@ export default function UploadCVPage() {
               <div className="mb-6 md:mb-8">
                 <FileUploadZone
                   onFileSelect={handleFileSelect}
-                  disabled={false}
+                  disabled={uploading}
                 ></FileUploadZone>
               </div>
 

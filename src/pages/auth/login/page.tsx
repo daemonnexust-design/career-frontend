@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
+import { useAuth } from '../../../hooks/useAuth';
 import ValidationMessage from '../../../components/base/ValidationMessage';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,7 +32,7 @@ export default function LoginPage() {
       if (error) throw error;
 
       if (data.user) {
-        navigate('/home');
+        navigate('/dashboard');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to log in. Please check your credentials.');
@@ -39,7 +47,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/home`
+          redirectTo: `${window.location.origin}/dashboard`
         }
       });
       if (error) throw error;

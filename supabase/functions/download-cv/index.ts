@@ -53,19 +53,35 @@ serve(async (req) => {
             Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         );
 
-        const filePath = `${user.id}/cv.pdf`;
-        console.log('Looking for file:', filePath);
+        // Fetch the file path from the database
+        const { data: cvRecord, error: dbError } = await supabaseAdmin
+            .from('user_cvs')
+            .select('file_path')
+            .eq('user_id', user.id)
+            .maybeSingle();
 
-        // Check if file exists first
-        const { data: files, error: listError } = await supabaseAdmin.storage.from('cv-uploads').list(user.id);
+        if (dbError || !cvRecord?.file_path) {
+            console.error('Database fetch error or no CV found:', dbError);
+            throw new Error('CV record not found in database. Please upload a CV first.');
+        }
+
+        const filePath = cvRecord.file_path;
+        console.log('Looking for file in storage:', filePath);
+
+        // Check if file exists in bucket (cv-uploads)
+        const pathParts = filePath.split('/');
+        const fileNameInBucket = pathParts.pop();
+        const folderPath = pathParts.join('/');
+
+        const { data: files, error: listError } = await supabaseAdmin.storage.from('cv-uploads').list(folderPath);
 
         if (listError) {
             console.error('Storage list error:', listError);
             throw new Error(`Storage error: ${listError.message}`);
         }
 
-        console.log('Files found in user folder:', files?.map(f => f.name));
-        const hasCV = files?.find(f => f.name === 'cv.pdf');
+        console.log('Files found in folder:', files?.map(f => f.name));
+        const hasCV = files?.find(f => f.name === fileNameInBucket);
 
         if (!hasCV) {
             console.log('CV file not found in storage');

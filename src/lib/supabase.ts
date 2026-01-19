@@ -9,5 +9,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.info('✅ Supabase initialized successfully:', supabaseUrl);
 }
 
-// Fallback to empty strings to prevent createClient from throwing if variables are undefined
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+// Create client with auth persistence - using default storage key for compatibility
+export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  }
+});
